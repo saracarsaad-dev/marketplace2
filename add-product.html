@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Product — Clay & Cobalt</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:            #e8f0f9;
+      --bg-dots:       #ccddf0;
+      --card-bg:       #f0f6ff;
+      --card-bg2:      #e4eefa;
+      --text-primary:  #1a2740;
+      --text-secondary:#4a6080;
+      --accent:        #3a6fc4;
+      --accent-dark:   #2a539a;
+      --accent-light:  #c8dcf7;
+      --accent-pale:   #deeafa;
+      --border:        #b8cfe8;
+      --shadow:        0 3px 14px rgba(30,60,120,0.10);
+      --shadow-hover:  0 14px 44px rgba(30,60,120,0.18);
+      --success-bg:    #eaf5ee;
+      --success-border:#a8d5b5;
+      --success-text:  #1e6636;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--bg);
+      background-image: radial-gradient(var(--bg-dots) 1.5px, transparent 1.5px);
+      background-size: 26px 26px;
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Blobs ── */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 480px; height: 480px;
+      background: #8ab8f0;
+      top: -120px; left: -120px;
+    }
+    body::after {
+      width: 380px; height: 380px;
+      background: #a8ccf5;
+      bottom: -100px; right: -80px;
+    }
+
+    header, main, footer { position: relative; z-index: 1; }
+
+    /* ── Header ── */
+    header {
+      padding: 3rem 2rem 2rem;
+      text-align: center;
+    }
+
+    .header-inner { display: inline-block; position: relative; }
+
+    .header-inner::before, .header-inner::after {
+      content: '✦';
+      position: absolute;
+      color: var(--accent);
+      opacity: 0.55;
+      font-size: 1rem;
+    }
+    .header-inner::before { top: -10px; left: -28px; transform: rotate(-15deg); }
+    .header-inner::after  { bottom: 4px; right: -26px; transform: rotate(20deg); font-size: 0.7rem; }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      border-radius: 100px;
+      padding: 0.25rem 0.9rem;
+      margin-bottom: 0.8rem;
+    }
+
+    h1 {
+      font-family: 'Lora', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+
+    h1 em { font-style: italic; color: var(--accent); }
+
+    .header-sub {
+      margin-top: 0.7rem;
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: var(--text-secondary);
+      max-width: 360px;
+      margin-inline: auto;
+      line-height: 1.6;
+    }
+
+    .squiggle {
+      display: block;
+      margin: 1.4rem auto 0;
+      width: 100px;
+      overflow: visible;
+    }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 1.2rem;
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: gap 0.2s ease, opacity 0.2s ease;
+      opacity: 0.8;
+    }
+    .back-link:hover { gap: 0.25rem; opacity: 1; }
+    .back-link svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* ── Main layout ── */
+    main {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 5rem;
+    }
+
+    /* ── Form card ── */
+    .form-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 28px;
+      padding: 2.4rem 2.2rem 2.6rem;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1) 0.1s forwards;
+    }
+
+    @keyframes popIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Field groups ── */
+    .field-group {
+      margin-bottom: 1.35rem;
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.45rem;
+    }
+
+    .field-group label .req {
+      color: #c0392b;
+      margin-left: 2px;
+      font-size: 0.85em;
+    }
+
+    .field-group input,
+    .field-group textarea,
+    .field-group select {
+      width: 100%;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0.7rem 1rem;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 400;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      appearance: none;
+    }
+
+    .field-group input::placeholder,
+    .field-group textarea::placeholder {
+      color: #a0b4cc;
+    }
+
+    .field-group input:focus,
+    .field-group textarea:focus,
+    .field-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(58,111,196,0.12);
+    }
+
+    .field-group textarea {
+      resize: vertical;
+      min-height: 90px;
+      line-height: 1.55;
+    }
+
+    .field-hint {
+      margin-top: 0.35rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Two-column row for price + emoji */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* ── Image preview ── */
+    .image-preview-wrap {
+      margin-top: 0.55rem;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1.5px dashed var(--border);
+      background: linear-gradient(135deg, var(--accent-light), var(--accent-pale));
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      transition: opacity 0.3s ease;
+    }
+
+    .image-preview-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ── Divider ── */
+    .form-divider {
+      border: none;
+      border-top: 1.5px dashed var(--border);
+      margin: 1.8rem 0;
+    }
+
+    /* ── Submit button ── */
+    .btn-submit {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      padding: 0.85rem 1.5rem;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 16px rgba(58,111,196,0.28);
+      transition: background 0.2s ease, transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--accent-dark);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 22px rgba(58,111,196,0.36);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-submit svg {
+      width: 16px; height: 16px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round; stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    /* Spinner inside button */
+    .btn-spinner {
+      width: 16px; height: 16px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Success banner ── */
+    .success-banner {
+      display: none;
+      background: var(--success-bg);
+      border: 1.5px solid var(--success-border);
+      border-radius: 16px;
+      padding: 1.4rem 1.6rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+
+    .success-banner.visible { display: block; }
+
+    .success-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .success-banner h3 {
+      font-family: 'Lora', serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--success-text);
+      margin-bottom: 0.3rem;
+    }
+
+    .success-banner p {
+      font-size: 0.86rem;
+      color: #3a7a52;
+      line-height: 1.5;
+    }
+
+    .success-banner .redirect-note {
+      margin-top: 0.6rem;
+      font-size: 0.78rem;
+      color: #5a9a72;
+      font-style: italic;
+    }
+
+    /* ── Error banner ── */
+    .error-banner {
+      display: none;
+      background: #fdf0ee;
+      border: 1.5px solid #f5c6c0;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.2rem;
+      font-size: 0.86rem;
+      color: #c0392b;
+      line-height: 1.5;
+    }
+    .error-banner.visible { display: block; }
+
+    /* ── Footer ── */
+    footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      border-top: 1.5px dashed var(--border);
+    }
+    footer span { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <p class="eyebrow">✦ New Listing ✦</p>
+    <h1>Add a <em>New Piece</em></h1>
+    <p class="header-sub">Fill in the details below and your product will appear in the shop.</p>
+  </div>
+
+  <svg class="squiggle" viewBox="0 0 120 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 6 Q10 0 20 6 Q30 12 40 6 Q50 0 60 6 Q70 12 80 6 Q90 0 100 6 Q110 12 120 6"
+          stroke="#7aaee8" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  </svg>
+
+  <div>
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to shop
+    </a>
+  </div>
+</header>
+
+<main>
+
+  <!-- Success banner (shown after submit) -->
+  <div class="success-banner" id="successBanner">
+    <div class="success-icon">🏺</div>
+    <h3>Product added!</h3>
+    <p>Your piece has been saved to the sheet and will appear in the shop shortly.</p>
+    <p class="redirect-note">Redirecting you back to the shop…</p>
+  </div>
+
+  <!-- Error banner -->
+  <div class="error-banner" id="errorBanner"></div>
+
+  <!-- Form card -->
+  <div class="form-card" id="formCard">
+
+    <!-- Product Name -->
+    <div class="field-group">
+      <label for="f-name">Product Name <span class="req">*</span></label>
+      <input type="text" id="f-name" name="name" placeholder="e.g. Wonky Mug No.7" autocomplete="off" />
+    </div>
+
+    <!-- Category -->
+    <div class="field-group">
+      <label for="f-category">Category</label>
+      <input type="text" id="f-category" name="category" placeholder="e.g. Drinkware, Vases, Tableware…" autocomplete="off" />
+    </div>
+
+    <!-- Description -->
+    <div class="field-group">
+      <label for="f-description">Description</label>
+      <textarea id="f-description" name="description" placeholder="Tell the story of this piece — glaze, texture, size, feel…"></textarea>
+    </div>
+
+    <!-- Price + Emoji -->
+    <div class="field-row">
+      <div class="field-group">
+        <label for="f-price">Price <span class="req">*</span></label>
+        <input type="number" id="f-price" name="price" placeholder="0.00" min="0" step="0.01" />
+      </div>
+      <div class="field-group">
+        <label for="f-emoji">Emoji Icon</label>
+        <input type="text" id="f-emoji" name="emoji" placeholder="🏺" maxlength="4" />
+        <p class="field-hint">Shown when no image is set</p>
+      </div>
+    </div>
+
+    <!-- Image URL -->
+    <div class="field-group">
+      <label for="f-image">Image URL</label>
+      <input type="url" id="f-image" name="image" placeholder="https://…" autocomplete="off" />
+      <p class="field-hint">Paste a direct link to an image (Unsplash, Imgur, etc.)</p>
+      <!-- Live image preview -->
+      <div class="image-preview-wrap" id="imagePreview">🏺</div>
+    </div>
+
+    <hr class="form-divider" />
+
+    <!-- Submit -->
+    <button class="btn-submit" id="submitBtn" type="button" onclick="handleSubmit()">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <span id="submitLabel">Save Product</span>
+    </button>
+
+  </div>
+</main>
+
+<footer>
+  <span>✦</span> &copy; 2026 Clay &amp; Cobalt. Made with muddy hands &amp; a big heart. <span>✦</span>
+</footer>
+
+<script>
+  // ─── CONFIGURATION ────────────────────────────────────────────────
+  // Paste your deployed Google Apps Script Web App URL here:
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzf1uscgILFEXz74BECM5eP5i5U7P-JuqLCdSoHJYI_PL1yN16XborSI1fHS9SKs87pRA/exec";
+  // ─────────────────────────────────────────────────────────────────
+
+  // ── Live image preview ──
+  const imgInput   = document.getElementById('f-image');
+  const imgPreview = document.getElementById('imagePreview');
+
+  imgInput.addEventListener('input', () => {
+    const url = imgInput.value.trim();
+    if (url) {
+      imgPreview.innerHTML =
+        `<img src="${url}" alt="preview"
+              onerror="this.parentElement.innerHTML='🖼️'"
+              onload="this.style.opacity=1" style="opacity:0;transition:opacity 0.3s ease" />`;
+    } else {
+      imgPreview.innerHTML = '🏺';
+    }
+  });
+
+  // ── Submit handler ──
+  async function handleSubmit() {
+    const btn        = document.getElementById('submitBtn');
+    const label      = document.getElementById('submitLabel');
+    const errBanner  = document.getElementById('errorBanner');
+    const succBanner = document.getElementById('successBanner');
+    const formCard   = document.getElementById('formCard');
+
+    // Hide previous errors
+    errBanner.classList.remove('visible');
+    errBanner.textContent = '';
+
+    // Gather values — field names match the Google Sheet column names
+    const data = {
+      name:        document.getElementById('f-name').value.trim(),
+      category:    document.getElementById('f-category').value.trim(),
+      description: document.getElementById('f-description').value.trim(),
+      price:       document.getElementById('f-price').value.trim(),
+      image:       document.getElementById('f-image').value.trim(),
+      emoji:       document.getElementById('f-emoji').value.trim(),
+    };
+
+    // Basic validation
+    if (!data.name) {
+      errBanner.textContent = 'Please enter a product name — it\'s the only required field!';
+      errBanner.classList.add('visible');
+      document.getElementById('f-name').focus();
+      return;
+    }
+    if (!data.price) {
+      errBanner.textContent = 'Please enter a price for this product.';
+      errBanner.classList.add('visible');
+      document.getElementById('f-price').focus();
+      return;
+    }
+
+    // Check Web App URL has been configured
+    if (WEB_APP_URL === "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+      errBanner.innerHTML =
+        '<strong>Setup needed:</strong> Open <code>add-product.html</code> and replace ' +
+        '<code>PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE</code> with your deployed Apps Script URL.';
+      errBanner.classList.add('visible');
+      return;
+    }
+
+    // ── Loading state ──
+    btn.disabled = true;
+    label.textContent = 'Saving…';
+    btn.innerHTML = '<div class="btn-spinner"></div><span>Saving…</span>';
+
+    try {
+      // Build URL with parameters — names match Google Sheet columns
+      const params = new URLSearchParams(data);
+      const response = await fetch(`${WEB_APP_URL}?${params.toString()}`);
+
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        // Apps Script sometimes returns non-JSON on redirect; treat as success if HTTP ok
+        result = { status: response.ok ? 'success' : 'error', message: 'Unexpected response.' };
+      }
+
+      if (result.status === 'success' || response.ok) {
+        // ── Show success, hide form ──
+        formCard.style.opacity   = '0';
+        formCard.style.transform = 'translateY(10px)';
+        formCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        setTimeout(() => { formCard.style.display = 'none'; }, 300);
+
+        succBanner.classList.add('visible');
+
+        // Redirect back to shop after 2.8 seconds
+        setTimeout(() => { window.location.href = 'index.html'; }, 2800);
+
+      } else {
+        throw new Error(result.message || 'Something went wrong.');
+      }
+
+    } catch (err) {
+      // ── Restore button on error ──
+      btn.disabled = false;
+      btn.innerHTML =
+        '<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
+        '<span>Save Product</span>';
+
+      errBanner.innerHTML = '<strong>Submission failed:</strong> ' + err.message +
+        '<br><small>Check your Apps Script URL and make sure the Web App is deployed as "Anyone can access".</small>';
+      errBanner.classList.add('visible');
+    }
+  }
+</script>
+
+</body>
+</html>
